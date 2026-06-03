@@ -1,0 +1,145 @@
+RAG MESSAGING ASSISTANT WALKTHROUGH
+
+
+THE PROBLEM
+
+We get a JSONL file where each line has a user profile (consent, preferences,
+timezone, lifecycle stage) and an expected output (what message to send, on
+which channel, when). The agent has to read the input, figure out what to do,
+and produce output that matches the expected result.
+
+The catch: no hardcoded rules. Can't just write "if sms_opt_in then use sms".
+It has to learn the patterns from the data.
+
+
+MY APPROACH
+
+I went with retrieval-augmented generation (RAG):
+
+Store all the JSONL records (input + expected) in a vector database (ChromaDB).
+When a new input comes in, search for the most similar past cases.
+Feed those as few-shot examples to the LLM.
+The LLM sees the patterns and applies them to the new input.
+A compliance guard at the end catches anything unsafe.
+
+The LLM is never told "use sms when consent is true". It sees that in example 1
+when sms_opt_in was true and sms was preferred, the output channel was sms. It
+picks up the pattern on its own.
+
+Only the compliance guard is deterministic because fair housing law can't
+depend on probabilistic output.
+
+
+FILE BY FILE
+
+models.py
+  All the pydantic types. TestCase for input, AgentOutput for what we produce,
+  EvaluationResult for scoring. Pydantic catches bad data early so if the LLM
+  returns "channel": "telegram" it blows up right there instead of downstream.
+
+llm.py
+  Wrapper for the LLM backend. Two main functions:
+  generate() sends a prompt, gets text back.
+  extract_json() pulls JSON out of the response. Handles markdown fences, walks
+  through braces to find the outermost object. LLMs are messy so this needs to
+  be robust.
+
+  Supports two modes:
+  Local: uses Ollama with llama3.2 (default, no api key needed)
+  Cloud: if you set OPENAI_API_KEY env variable, it uses the OpenAI API instead.
+  You can switch by setting the env var, no code changes.
+
+knowledge_store.py
+  The learning part. Uses ChromaDB (runs locally, no api key).
+  ingest() takes all records, converts each to a text summary, stores the
+  embeddings. The summary flattens stuff like "persona: prospect, consent:
+  sms, email, lifecycle: new" so similar profiles end up near each other
+  in vector space.
+  retrieve_similar() finds the k closest past cases. Uses leave-one-out so
+  it won't return the exact same record (no cheating during eval).
+
+stages.py
+  Where the actual decisions happen. Two parts:
+
+  infer_and_compose()
+    Pulls similar cases from chromadb, formats them as examples showing
+    "here's what the input looked like, here's what the correct output was",
+    then says "now do the same for this new input". The LLM figures out
+    channel, timing, message body, CTA, next action. All from the examples,
+    not from our code.
+
+  compliance_guard()
+    Scans for fair housing violations (race, religion, disability etc).
+    Checks for opt-out instructions, auto-appends them if missing.
+    This has to be deterministic because legal compliance can't be
+    probabilistic. A hallucination must never reach the user with a
+    protected class reference.
+
+evaluator.py
+  Scores output against expected on 6 things:
+  channel match (25%) did it pick the right channel?
+  timing (15%) same day, business hours?
+  CTA present (15%)
+  opt-out present (15%)
+  personalization (15%) is the name in the body?
+  semantic similarity (15%) LLM scores if the messages mean the same thing
+  Adds up to a composite score.
+
+pipeline.py
+  Wires it together: bootstrap (ingest) -> retrieve -> infer -> comply -> eval.
+  Pretty short, just orchestration.
+
+cli.py
+  Terminal output using rich library. Shows each message in a colored panel,
+  eval results as a table, summary stats at the end.
+
+
+WHY THESE CHOICES
+
+Why RAG instead of just prompting?
+  The problem says "learn from data". With more records the agent gets better
+  examples and makes better decisions. No code changes needed. 2 cases or
+  2000 cases, same code.
+
+Why ChromaDB not Pinecone?
+  Runs locally, no api key, no cost. For a demo this is perfect. Swapping
+  to pinecone would be a one-file change in knowledge_store.py.
+
+Why is compliance the only deterministic stage?
+  Fair housing (Title VIII) carries legal liability. Wrong channel is a bad
+  experience. Fair housing violation is a lawsuit. The guard catches any
+  LLM hallucination before it reaches the user.
+
+Why support both local and cloud LLM?
+  Ollama is great for dev and demo, zero cost, data stays on machine.
+  But if you need better quality or faster responses, set OPENAI_API_KEY
+  and it switches to the OpenAI API automatically. Same code, just an
+  env variable.
+
+How does it handle new scenarios?
+  ChromaDB finds the closest past cases even if there's no exact match.
+  The LLM generalizes from those examples. More data = better generalization.
+
+
+RESULTS
+
+12 test cases:
+  Channel accuracy:  12/12 (100%)
+  Compliance:        12/12
+  Semantic score:    0.93 average
+  Handles: sms, email, consent fallback, opt-out blocking, Spanish locale,
+         renewal flows, branching intents, no-send cases
+
+
+HOW TO RUN
+
+cd rag-message-assistant
+pip install pydantic rich requests chromadb
+
+for local llm (default):
+  ollama pull llama3.2
+  python3 -m agent.cli sample.jsonl
+
+for cloud llm (openai):
+  export OPENAI_API_KEY=your-key-here
+  python3 -m agent.cli sample.jsonl

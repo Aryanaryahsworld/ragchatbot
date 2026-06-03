@@ -1,0 +1,467 @@
+[
+  {
+    "task_id": "prospect_welcome_day0",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "Consent is true for both email and sms, so we'll use the first preferred channel that has consent. Since 'sms' comes before 'email' in the preferences list, we'll send an SMS message.",
+      "next_message": {
+        "channel": "sms",
+        "send_at": "2025-12-09T09:00:00-06:00",
+        "subject": null,
+        "body": "Hi Taylor\u2014welcome to Oak Ridge! Tours are available this week. Would you like to book a time on Thursday or Friday? Reply 1 for Thu, 2 for Fri. Reply STOP to opt out.",
+        "cta": {
+          "type": "schedule_tour",
+          "options": [
+            "Thu",
+            "Fri"
+          ],
+          "link": null
+        }
+      },
+      "next_action": {
+        "type": "start_cadence",
+        "name": "prospect_welcome_short_horizon",
+        "value": null,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "prospect_welcome_day0",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 1.0,
+      "notes": "Composite: 1.00 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.15}"
+    },
+    "ms": 10663.3
+  },
+  {
+    "task_id": "prospect_long_horizon_day3",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "Consent is true for email and the first preferred channel that has consent is email.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-09T10:00:00-06:00",
+        "subject": "Tour Oak Ridge\u2014See the pool & fitness rooms you asked about",
+        "body": "Hi Taylor,\nSince you're planning a mid\u2013February move, here's a quick look at our pool and 24/7 fitness center. Book a visit this week to compare floor plans.\nBook now \u2192 https://oakridge.example/tour\nTo opt out of emails, click here or reply STOP.",
+        "cta": {
+          "type": "schedule_tour",
+          "options": null,
+          "link": "https://oakridge.example/tour"
+        }
+      },
+      "next_action": {
+        "type": "follow_up_in_days",
+        "name": null,
+        "value": 3,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "prospect_long_horizon_day3",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.99 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 8735.7
+  },
+  {
+    "task_id": "prospect_no_show_reengage",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "The prospect has consented to both SMS and email, so we can send a message through either channel. We're picking the first preferred channel that has consent, which is SMS. The message will be sent at 9:15 AM CST on December 9th, with a subject line and body that personalize Taylor's name and interests. The CTA will be to reschedule the tour for today or tomorrow, with an opt-out option.",
+      "next_message": {
+        "channel": "sms",
+        "send_at": "2025-12-09T09:15:00-06:00",
+        "subject": null,
+        "body": "We missed you yesterday, Taylor. Want to reschedule your Oak Ridge tour? Reply 1 for today, 2 for tomorrow. Reply STOP to opt out.",
+        "cta": {
+          "type": "reschedule",
+          "options": [
+            "today",
+            "tomorrow"
+          ],
+          "link": null
+        }
+      },
+      "next_action": {
+        "type": "reset_cadence",
+        "name": "prospect_reengage",
+        "value": null,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "prospect_no_show_reengage",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 1.0,
+      "notes": "Composite: 1.00 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.15}"
+    },
+    "ms": 9240.4
+  },
+  {
+    "task_id": "prospect_cancellation_manager_cross_sell",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "The prospect has consented to email and the preferred channel is email, so we can send an email message.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-09T13:00:00-06:00",
+        "subject": "",
+        "body": "Hi Taylor,\nWe can work around your schedule with evening and weekend tours. Studios start near $1,650. Want to pick a time?\nSchedule \u2192 https://oakridge.example/tour\nOpt\u2011out here or reply STOP.",
+        "cta": {
+          "type": "schedule_tour",
+          "options": null,
+          "link": "https://oakridge.example/tour"
+        }
+      },
+      "next_action": {
+        "type": "follow_up_in_days",
+        "name": null,
+        "value": 2,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "prospect_cancellation_manager_cross_sell",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.99 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 8043.0
+  },
+  {
+    "task_id": "prospect_consent_block_sms_fallback_email",
+    "examples": 3,
+    "output": {
+      "should_send": false,
+      "reasoning": "No channel has consent that matches the user's preferences.",
+      "next_message": null,
+      "next_action": {
+        "type": "reset_cadence",
+        "name": null,
+        "value": null,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "prospect_consent_block_sms_fallback_email",
+      "channel_match": false,
+      "timing_appropriate": false,
+      "has_personalization": false,
+      "has_opt_out": false,
+      "has_cta": false,
+      "compliance_pass": false,
+      "semantic_score": 0.0,
+      "notes": "agent chose not to send but expected a message"
+    },
+    "ms": 5463.2
+  },
+  {
+    "task_id": "resident_renewal_90day_notice",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "The resident has opted-in to all channels (email, sms, voice) and the first preferred channel with consent is email.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-09T10:30:00-06:00",
+        "subject": "Jordan, your renewal options at Oak Ridge",
+        "body": "Hi Jordan,\nIt's time to review renewal options for your home (A\u2011204). We've reserved current pricing for 10 days.\nReview your offer \u2192 https://oakridge.example/renewal/A-204\nIf you prefer text, reply YES to get reminders by SMS. Opt\u2011out any time.",
+        "cta": {
+          "type": "review_renewal",
+          "options": null,
+          "link": "https://oakridge.example/renewal/A-204"
+        }
+      },
+      "next_action": {
+        "type": "schedule_sms_reminder",
+        "name": null,
+        "value": null,
+        "mapping": null,
+        "reason": null,
+        "in_days": 5
+      }
+    },
+    "eval": {
+      "task_id": "resident_renewal_90day_notice",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.99 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 8919.8
+  },
+  {
+    "task_id": "resident_renewal_undecided_followup",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "The resident has opted-in to both SMS and email, so we can use the first preferred channel that has consent.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-14T09:00:00-06:00",
+        "subject": null,
+        "body": "Hi Jordan\u2014quick reminder: would you like to renew A\u2011204? Reply 1 Yes, 2 No, 3 Need more details. Reply STOP to opt out.",
+        "cta": {
+          "type": "intent_capture",
+          "options": [
+            "yes",
+            "no",
+            "details"
+          ],
+          "link": null
+        }
+      },
+      "next_action": {
+        "type": "branch_on_intent",
+        "name": null,
+        "value": null,
+        "mapping": {
+          "yes": "start_esign_flow",
+          "no": "exit_nurture",
+          "details": "send_offer_details_email"
+        },
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "resident_renewal_undecided_followup",
+      "channel_match": false,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.73 | {\"channel\": 0.0, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 9127.9
+  },
+  {
+    "task_id": "resident_welcome_day0",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "Consent is true for both email and sms, and the first preferred channel with consent is email.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-10T09:30:00-06:00",
+        "subject": "Welcome to Oak Ridge\u2014get set up before move\u2011in",
+        "body": "Hi Jordan,\nWelcome! Before move\u2011in, please register for packages and check amenity hours.\nGet started \u2192 https://oakridge.example/welcome\nOpt\u2011out here or reply STOP.",
+        "cta": {
+          "type": "get_started",
+          "options": null,
+          "link": "https://oakridge.example/welcome"
+        }
+      },
+      "next_action": {
+        "type": "follow_up_in_days",
+        "name": null,
+        "value": 2,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "resident_welcome_day0",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.99 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 8182.2
+  },
+  {
+    "task_id": "resident_loyalty_engage",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "The resident has consented to both email and SMS channels, with email being their preferred channel.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-12T11:00:00-06:00",
+        "subject": "Earn rewards at Oak Ridge\u2014join loyalty",
+        "body": "Hi Jordan,\nYou're eligible for Oak Ridge Rewards. Enroll in 1 minute and start earning.\nEnroll \u2192 https://oakridge.example/loyalty\nOpt\u2011out here or reply STOP.",
+        "cta": {
+          "type": "enroll_loyalty",
+          "options": null,
+          "link": "https://oakridge.example/loyalty"
+        }
+      },
+      "next_action": {
+        "type": "follow_up_in_days",
+        "name": null,
+        "value": 5,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "resident_loyalty_engage",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.99 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 8217.6
+  },
+  {
+    "task_id": "resident_opt_out_respected",
+    "examples": 3,
+    "output": {
+      "should_send": false,
+      "reasoning": "No consent channels are available due to resident's lack of opt-in for any communication channel.",
+      "next_message": null,
+      "next_action": {
+        "type": "no_op",
+        "name": null,
+        "value": null,
+        "mapping": null,
+        "reason": "no_contact_consent",
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "resident_opt_out_respected",
+      "channel_match": true,
+      "timing_appropriate": false,
+      "has_personalization": false,
+      "has_opt_out": false,
+      "has_cta": false,
+      "compliance_pass": true,
+      "semantic_score": 1.0,
+      "notes": "no-send case"
+    },
+    "ms": 5704.3
+  },
+  {
+    "task_id": "prospect_spanish_locale",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "Consent is true for both email and sms channels, so we pick the first preferred channel that has consent.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-09T13:00:00-06:00",
+        "subject": null,
+        "body": "Hola Luc\u00eda, gracias por tu inter\u00e9s en Oak Ridge. \u00bfQuieres agendar una visita esta semana? Responde 1 para jueves, 2 para viernes. Responde STOP para cancelar.",
+        "cta": {
+          "type": "schedule_tour",
+          "options": [
+            "jueves",
+            "viernes"
+          ],
+          "link": null
+        }
+      },
+      "next_action": {
+        "type": "follow_up_in_days",
+        "name": null,
+        "value": 2,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "prospect_spanish_locale",
+      "channel_match": false,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 1.0,
+      "notes": "Composite: 0.75 | {\"channel\": 0.0, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.15}"
+    },
+    "ms": 8453.6
+  },
+  {
+    "task_id": "resident_renewal_details_branch_email",
+    "examples": 3,
+    "output": {
+      "should_send": true,
+      "reasoning": "The resident has consented to email, which is their preferred channel.",
+      "next_message": {
+        "channel": "email",
+        "send_at": "2025-12-14T09:10:00-06:00",
+        "subject": "Your renewal details for A\u2011204",
+        "body": "Hi Jordan,\nHere are your renewal details for A\u2011204, including term options and monthly pricing. Ready to continue?\nView details \u2192 https://oakridge.example/renewal/A-204/details\nOpt\u2011out here or reply STOP.",
+        "cta": {
+          "type": "review_renewal_details",
+          "options": null,
+          "link": "https://oakridge.example/renewal/A-204/details"
+        }
+      },
+      "next_action": {
+        "type": "start_esign_flow",
+        "name": null,
+        "value": null,
+        "mapping": null,
+        "reason": null,
+        "in_days": null
+      }
+    },
+    "eval": {
+      "task_id": "resident_renewal_details_branch_email",
+      "channel_match": true,
+      "timing_appropriate": true,
+      "has_personalization": true,
+      "has_opt_out": true,
+      "has_cta": true,
+      "compliance_pass": true,
+      "semantic_score": 0.9,
+      "notes": "Composite: 0.99 | {\"channel\": 0.25, \"timing\": 0.15, \"cta\": 0.15, \"opt_out\": 0.15, \"personal\": 0.15, \"semantic\": 0.14}"
+    },
+    "ms": 8750.1
+  }
+]

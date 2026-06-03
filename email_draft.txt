@@ -1,0 +1,77 @@
+Subject: Messaging Agent Solution - As Discussed
+
+
+Hi,
+
+As discussed, I'm sharing the messaging agent solution. I've built a context-aware bot that reads the JSONL test cases and figures out what message to send, on which channel, and when - all by learning from the data itself, no hardcoded rules.
+
+The core idea is RAG (Retrieval-Augmented Generation). All the test cases get stored in a local vector database (ChromaDB). When a new input comes in, the system finds the most similar past cases, feeds them as examples to the LLM, and the model picks up the patterns on its own. It sees things like "when SMS consent was true and SMS was preferred, the output was SMS" and applies that to new inputs.
+
+ the compliance guard at the end - fair housing checks and opt-out validation. This has to be deterministic because legal compliance can't depend on probabilistic model output.
+
+I tested it against all 12 test cases and got:
+- 12/12 channel accuracy (100%)
+- 12/12 compliance pass
+- 0.93 average semantic similarity score
+
+It covers all the scenarios - SMS, email, consent fallback, opt-out blocking, Spanish locale, renewal flows, intent branching, and the no-send case where all consent is false.
+
+For the LLM backend, I've kept it flexible. By default it runs with Ollama (llama3.2) locally, but if you have an OpenAI or Gemini API key, just set the environment variable and it switches automatically. No code changes needed.
+
+
+How to run (Mac):
+
+  cd rag-message-assistant
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install pydantic rich requests chromadb
+
+  # if using local LLM
+  ollama pull llama3.2
+  python3 -m agent.cli sample.jsonl
+
+  # if using OpenAI
+  export OPENAI_API_KEY=your-key
+  python3 -m agent.cli sample.jsonl
+
+  # if using Gemini
+  export GEMINI_API_KEY=your-key
+  python3 -m agent.cli sample.jsonl
+
+
+How to run (Windows):
+
+  cd rag-message-assistant
+  python -m venv venv
+  venv\Scripts\activate
+  pip install pydantic rich requests chromadb
+
+  # if using local LLM
+  ollama pull llama3.2
+  python -m agent.cli sample.jsonl
+
+  # if using OpenAI
+  set OPENAI_API_KEY=your-key
+  python -m agent.cli sample.jsonl
+
+  # if using Gemini
+  set GEMINI_API_KEY=your-key
+  python -m agent.cli sample.jsonl
+
+
+Regarding the code structure - I kept it modular so each piece is easy to follow:
+
+  models.py          - all the data types (pydantic)
+  llm.py             - LLM wrapper (ollama/openai/gemini)
+  knowledge_store.py - vector db for storing and retrieving cases
+  stages.py          - where the LLM makes decisions + compliance guard
+  evaluator.py       - scoring against expected output
+  pipeline.py        - orchestration
+  cli.py             - terminal output
+
+The code is optimized in a few ways. ChromaDB runs locally so there's no network overhead for the vector search. The LLM is called only once per test case for the actual decision-making, and the compliance check is pure Python so it adds basically zero latency. The JSON extraction handles messy LLM output robustly - markdown fences, extra text, nested braces - so it doesn't break even when the model is inconsistent.
+
+Happy to walk through any part of the code in detail or answer questions.
+
+Thanks,
+Aryan

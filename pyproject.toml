@@ -1,0 +1,13 @@
+[project]
+name = "rag-message-assistant"
+version = "1.0.0"
+description = "Context-aware autonomous messaging agent with few-shot inference from structured data"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "pydantic>=2.0",
+    "rich>=13.0",
+]
+
+[project.scripts]
+message-agent = "agent.cli:main"

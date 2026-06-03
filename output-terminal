@@ -1,0 +1,334 @@
+er_test-feb-api_integration 4/rag-message-assistant"
+source venv/bin/activate
+rm -rf .chroma_store
+python3 -m agent.cli sample.jsonl
+
+╭─────────────────────────────────────────────────╮
+│ RAG Messaging Assistant                         │
+│ Pipeline: Ingest -> Retrieve -> Infer -> Comply │
+│ ChromaDB + Ollama llama3.2                      │
+╰─────────────────────────────────────────────────╯
+  12 test cases
+  12 cases loaded into ChromaDB
+
+
+───────────────────────────────────── prospect_welcome_day0 ──────────────────────────────────────
+╭─────────────────────────────── SMS @ 2025-12-09T09:00:00-06:00 ────────────────────────────────╮
+│                                                                                                │
+│  Hi Taylor—welcome to Oak Ridge! Tours are available this week. Would you like to book a time  │
+│  on Thursday or Friday? Reply 1 for Thu, 2 for Fri. Reply STOP to opt out.                     │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: schedule_tour | Options: ['Thu', 'Fri']
+  Next: start_cadence (prospect_welcome_short_horizon)
+  examples: 3 | Consent is true for both email and sms, so we'll use the first preferred channel 
+that has consent. Since 'sms' comes before 'email' in the preferences list, we'll send an SMS 
+message.
+          Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━━┓
+┃ Check      ┃ Result  ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━┩
+│ Channel    │  PASS   │
+│ Timing     │  PASS   │
+│ CTA        │  PASS   │
+│ Opt-Out    │  PASS   │
+│ Personal   │  PASS   │
+│ Compliance │  PASS   │
+│ Semantic   │  1.00   │
+│ Latency    │ 10663ms │
+└────────────┴─────────┘
+  Composite: 1.00 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.15}
+
+─────────────────────────────────── prospect_long_horizon_day3 ───────────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-09T10:00:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Subject: Tour Oak Ridge—See the pool & fitness rooms you asked about                          │
+│                                                                                                │
+│  Hi Taylor,                                                                                    │
+│  Since you're planning a mid–February move, here's a quick look at our pool and 24/7 fitness   │
+│  center. Book a visit this week to compare floor plans.                                        │
+│  Book now → https://oakridge.example/tour                                                      │
+│  To opt out of emails, click here or reply STOP.                                               │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: schedule_tour | Link: https://oakridge.example/tour
+  Next: follow_up_in_days in 3d
+  examples: 3 | Consent is true for email and the first preferred channel that has consent is 
+email.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 8736ms │
+└────────────┴────────┘
+  Composite: 0.99 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+─────────────────────────────────── prospect_no_show_reengage ────────────────────────────────────
+╭─────────────────────────────── SMS @ 2025-12-09T09:15:00-06:00 ────────────────────────────────╮
+│                                                                                                │
+│  We missed you yesterday, Taylor. Want to reschedule your Oak Ridge tour? Reply 1 for today,   │
+│  2 for tomorrow. Reply STOP to opt out.                                                        │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: reschedule | Options: ['today', 'tomorrow']
+  Next: reset_cadence (prospect_reengage)
+  examples: 3 | The prospect has consented to both SMS and email, so we can send a message through
+either channel. We're picking the first preferred channel that has consent, which is SMS. The 
+message will be sent at 9:15 AM CST on December 9th, with a subject line and body that personalize
+Taylor's name and interests. The CTA will be to reschedule the tour for today or tomorrow, with an
+opt-out option.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  1.00  │
+│ Latency    │ 9240ms │
+└────────────┴────────┘
+  Composite: 1.00 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.15}
+
+──────────────────────────── prospect_cancellation_manager_cross_sell ────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-09T13:00:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Hi Taylor,                                                                                    │
+│  We can work around your schedule with evening and weekend tours. Studios start near $1,650.   │
+│  Want to pick a time?                                                                          │
+│  Schedule → https://oakridge.example/tour                                                      │
+│  Opt‑out here or reply STOP.                                                                   │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: schedule_tour | Link: https://oakridge.example/tour
+  Next: follow_up_in_days in 2d
+  examples: 3 | The prospect has consented to email and the preferred channel is email, so we can 
+send an email message.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 8043ms │
+└────────────┴────────┘
+  Composite: 0.99 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+─────────────────────────── prospect_consent_block_sms_fallback_email ────────────────────────────
+  DO NOT SEND
+  No channel has consent that matches the user's preferences.
+  Next: reset_cadence ()
+
+───────────────────────────────── resident_renewal_90day_notice ──────────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-09T10:30:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Subject: Jordan, your renewal options at Oak Ridge                                            │
+│                                                                                                │
+│  Hi Jordan,                                                                                    │
+│  It's time to review renewal options for your home (A‑204). We've reserved current pricing     │
+│  for 10 days.                                                                                  │
+│  Review your offer → https://oakridge.example/renewal/A-204                                    │
+│  If you prefer text, reply YES to get reminders by SMS. Opt‑out any time.                      │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: review_renewal | Link: https://oakridge.example/renewal/A-204
+  Next: schedule_sms_reminder in 5d
+  examples: 3 | The resident has opted-in to all channels (email, sms, voice) and the first 
+preferred channel with consent is email.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 8920ms │
+└────────────┴────────┘
+  Composite: 0.99 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+────────────────────────────── resident_renewal_undecided_followup ───────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-14T09:00:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Hi Jordan—quick reminder: would you like to renew A‑204? Reply 1 Yes, 2 No, 3 Need more       │
+│  details. Reply STOP to opt out.                                                               │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: intent_capture | Options: ['yes', 'no', 'details']
+  Next: branch_on_intent -> {'yes': 'start_esign_flow', 'no': 'exit_nurture', 'details': 
+'send_offer_details_email'}
+  examples: 3 | The resident has opted-in to both SMS and email, so we can use the first preferred
+channel that has consent.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  FAIL  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 9128ms │
+└────────────┴────────┘
+  Composite: 0.73 | {"channel": 0.0, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+───────────────────────────────────── resident_welcome_day0 ──────────────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-10T09:30:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Subject: Welcome to Oak Ridge—get set up before move‑in                                       │
+│                                                                                                │
+│  Hi Jordan,                                                                                    │
+│  Welcome! Before move‑in, please register for packages and check amenity hours.                │
+│  Get started → https://oakridge.example/welcome                                                │
+│  Opt‑out here or reply STOP.                                                                   │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: get_started | Link: https://oakridge.example/welcome
+  Next: follow_up_in_days in 2d
+  examples: 3 | Consent is true for both email and sms, and the first preferred channel with 
+consent is email.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 8182ms │
+└────────────┴────────┘
+  Composite: 0.99 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+──────────────────────────────────── resident_loyalty_engage ─────────────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-12T11:00:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Subject: Earn rewards at Oak Ridge—join loyalty                                               │
+│                                                                                                │
+│  Hi Jordan,                                                                                    │
+│  You're eligible for Oak Ridge Rewards. Enroll in 1 minute and start earning.                  │
+│  Enroll → https://oakridge.example/loyalty                                                     │
+│  Opt‑out here or reply STOP.                                                                   │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: enroll_loyalty | Link: https://oakridge.example/loyalty
+  Next: follow_up_in_days in 5d
+  examples: 3 | The resident has consented to both email and SMS channels, with email being their 
+preferred channel.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 8218ms │
+└────────────┴────────┘
+  Composite: 0.99 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+─────────────────────────────────── resident_opt_out_respected ───────────────────────────────────
+  DO NOT SEND
+  No consent channels are available due to resident's lack of opt-in for any communication 
+channel.
+  Next: no_op (no_contact_consent)
+
+──────────────────────────────────── prospect_spanish_locale ─────────────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-09T13:00:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Hola Lucía, gracias por tu interés en Oak Ridge. ¿Quieres agendar una visita esta semana?     │
+│  Responde 1 para jueves, 2 para viernes. Responde STOP para cancelar.                          │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: schedule_tour | Options: ['jueves', 'viernes']
+  Next: follow_up_in_days in 2d
+  examples: 3 | Consent is true for both email and sms channels, so we pick the first preferred 
+channel that has consent.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  FAIL  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  1.00  │
+│ Latency    │ 8454ms │
+└────────────┴────────┘
+  Composite: 0.75 | {"channel": 0.0, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.15}
+
+───────────────────────────── resident_renewal_details_branch_email ──────────────────────────────
+╭────────────────────────────── EMAIL @ 2025-12-14T09:10:00-06:00 ───────────────────────────────╮
+│                                                                                                │
+│  Subject: Your renewal details for A‑204                                                       │
+│                                                                                                │
+│  Hi Jordan,                                                                                    │
+│  Here are your renewal details for A‑204, including term options and monthly pricing. Ready    │
+│  to continue?                                                                                  │
+│  View details → https://oakridge.example/renewal/A-204/details                                 │
+│  Opt‑out here or reply STOP.                                                                   │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+  CTA: Type: review_renewal_details | Link: https://oakridge.example/renewal/A-204/details
+  Next: start_esign_flow
+  examples: 3 | The resident has consented to email, which is their preferred channel.
+         Eval          
+┏━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Check      ┃ Result ┃
+┡━━━━━━━━━━━━╇━━━━━━━━┩
+│ Channel    │  PASS  │
+│ Timing     │  PASS  │
+│ CTA        │  PASS  │
+│ Opt-Out    │  PASS  │
+│ Personal   │  PASS  │
+│ Compliance │  PASS  │
+│ Semantic   │  0.90  │
+│ Latency    │ 8750ms │
+└────────────┴────────┘
+  Composite: 0.99 | {"channel": 0.25, "timing": 0.15, "cta": 0.15, "opt_out": 0.15, "personal": 
+0.15, "semantic": 0.14}
+
+──────────────────────────────────────────── Summary ─────────────────────────────────────────────
+  Cases: 12
+  Channel: 9/12 (75%)
+  Compliance: 11/12
+  Semantic: 0.86
+  Latency: 8292ms avg
+
+  Saved: sample_results.json
+(venv) aryanshaikhm4@Aryans-MacBook-Pro-2 rag-message-assistant % 
